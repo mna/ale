@@ -33,6 +33,14 @@ endfunction
 
 function! s:HandleLSPDiagnostics(conn_id, response) abort
     let l:linter_name = s:lsp_linter_map[a:conn_id]
+    " ignore the response if there is no uri parameter, as it happens
+    " sometimes with Vala LSP.
+    "exec ('echom "FromURI response: " . json_encode(a:response)')
+
+    if !has_key(a:response.params, 'uri')
+        return
+    endif
+
     let l:filename = ale#path#FromURI(a:response.params.uri)
     let l:buffer = bufnr('^' . l:filename . '$')
     let l:info = get(g:ale_buffer_info, l:buffer, {})
